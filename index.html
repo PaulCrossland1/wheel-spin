@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Winner Wheel - a random name picker and decision maker for games, giveaways, and team selection">
+    <meta name="keywords" content="wheel of names, random picker, winner selector, spin wheel, decision maker">
+    <meta name="author" content="Liam McCarthy">
+    <meta property="og:title" content="Winner Wheel - Random Name Picker">
+    <meta property="og:description" content="Free online spinner tool to pick random winners, make decisions, and select participants randomly">
+    <meta property="og:image" content="images/graph_image.png">
+    <meta property="og:url" content="https://winnerwheelapp.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Winner Wheel - Random Name Picker</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="main-title" contenteditable="true" spellcheck="false">Winner Wheel</h1>
+            <div class="settings-icon">⚙️</div>
+        </div>
+        
+        <div class="main-content">
+            <div class="wheel-container">
+                <canvas id="wheel" width="500" height="500"></canvas>
+                <div id="selector"></div>
+                <button id="spin-button">SPIN</button>
+                <div id="result"></div>
+            </div>
+            
+            <div class="entries-panel">
+                <h2>Entries</h2>
+                <div class="entries-container" id="entries-list">
+                    <!-- Entries will be added here dynamically -->
+                </div>
+                <p class="entry-instruction">Add names one by one or paste a comma-separated list.</p>
+                <div class="entry-form">
+                    <input type="text" id="new-entry" placeholder="Add name">
+                    <button id="add-entry">+</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-panel" id="settings-panel">
+            <h2>Settings</h2>
+            <div class="setting">
+                <label for="wheel-bg-color">Wheel Background:</label>
+                <input type="color" id="wheel-bg-color" value="#2c3e50">
+            </div>
+            <div class="setting">
+                <label for="text-color">Text Color:</label>
+                <input type="color" id="text-color" value="#ffffff">
+            </div>
+            <button id="close-settings">Close</button>
+        </div>
+        
+        <!-- Winner modal -->
+        <div class="winner-modal" id="winner-modal">
+            <div class="winner-modal-content">
+                <h2 class="winner-name" id="winner-name"></h2>
+                <p class="winner-message">🎉 Congratulations! 🎉</p>
+                <button class="close-modal" id="close-modal">Close</button>
+            </div>
+        </div>
+        
+        <!-- Confetti canvas -->
+        <canvas id="confetti-canvas"></canvas>
+        
+        <footer>
+            <p>Winner Wheel. Built for <a href="http://spaceydigital.com">Spacey Digital</a>.</p>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
