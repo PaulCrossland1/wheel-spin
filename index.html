@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Winner Wheel - a random name picker and decision maker for games, giveaways, and team selection">
-    <meta name="keywords" content="wheel of names, random picker, winner selector, spin wheel, decision maker">
-    <meta name="author" content="Paul Crossland (hello@paulcrossland.com)">
-    <meta property="og:title" content="Select a Winner Wheel - Random Picker">
-    <meta property="og:description" content="Free online spinner tool to pick random winners, make decisions, and select participants randomly">
+    <title>Giveaway Spinner Wheel - Free Random Winner Picker | Winner Wheel</title>
+    <meta name="description" content="Easily pick a random winner for your giveaway, contest, or raffle with our free spinning prize wheel! Fair, fun, and simple random name picker tool.">
+    <meta name="keywords" content="giveaway spinner, spin the wheel, prize wheel, random name picker, contest winner generator, raffle wheel, random giveaway picker, free spinner wheel, winner wheel, decision maker">
+    <meta name="author" content="Liam McCarthy">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://selectawinnerwheel.com">
+    <meta property="og:title" content="Free Giveaway Spinner Wheel - Pick a Random Winner!">
+    <meta property="og:description" content="Generate a random winner for your contest or promotion instantly with our easy-to-use online spinning wheel.">
     <meta property="og:image" content="images/graph_image.png">
-    <meta property="og:url" content="https://selectawinnerwheel.com">
-    <meta name="twitter:card" content="summary_large_image">
-    <title>Winner Wheel - Random Name Picker</title>
-    <link rel="icon" type="image/png" href="images/favicon.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://selectawinnerwheel.com">
+    <meta property="twitter:title" content="Free Giveaway Spinner Wheel - Pick a Random Winner!">
+    <meta property="twitter:description" content="Generate a random winner for your contest or promotion instantly with our easy-to-use online spinning wheel.">
+    <meta property="twitter:image" content="images/graph_image.png">
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+    <link rel="manifest" href="images/site.webmanifest">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +37,7 @@
         
         <div class="main-content">
             <div class="wheel-container">
-                <canvas id="wheel" width="500" height="500"></canvas>
+                <canvas id="wheel" width="550" height="550"></canvas>
                 <div id="selector"></div>
                 <button id="spin-button">SPIN</button>
                 <div id="result"></div>
@@ -48,6 +59,7 @@
         <!-- Winner modal -->
         <div class="winner-modal" id="winner-modal">
             <div class="winner-modal-content">
+                <h2>The winner is...</h2>
                 <h2 class="winner-name" id="winner-name"></h2>
                 <p class="winner-message">🎉 Congratulations! 🎉</p>
                 <button class="close-modal" id="close-modal">Close</button>
@@ -58,7 +70,7 @@
         <canvas id="confetti-canvas"></canvas>
         
         <footer>
-            <p>Winner Wheel. Built exclusively for <a href="http://spaceydigital.com">Spacey Digital</a>.</p>
+            <p>Select a Winner Wheel. Built for <a href="http://spaceydigital.com">Spacey Digital</a>.</p>
         </footer>
     </div>
     

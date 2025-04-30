@@ -15,7 +15,7 @@ A beautiful and interactive spinning wheel application for random selection, giv
 
 ## Usage
 
-1. Visit [Winner Wheel](https://winnerwheelapp.com)
+1. Visit [Winner Wheel](https://selectawinnerwheel.com)
 2. Add entries individually or in bulk using the entry panel
 3. Click the "SPIN" button to randomly select a winner
 4. See the winner announcement and result display
@@ -26,7 +26,6 @@ If you want to run this locally:
 
 1. Clone the repository
 ```
-git clone https://github.com/liammccarthy/winner-wheel.git
 ```
 
 2. Open `index.html` in your browser
@@ -46,8 +45,8 @@ The application is built with vanilla JavaScript, HTML, and CSS.
 
 ## License
 
-© 2023 Winner Wheel. Built exclusively for Liam McCarthy.
+© 2025 Select a Winner Wheel. Built by Paul Crossland.
 
 ## Contact
 
-For support or inquiries, please contact [support@winnerwheelapp.com](mailto:support@winnerwheelapp.com)
+For support or inquiries, please contact [hello@paulcrossland.com](mailto:hello@paulcrossland.com)
