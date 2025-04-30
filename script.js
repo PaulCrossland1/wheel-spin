@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let wheelColors = [
         '#ff6b81', '#5f27cd', '#54a0ff', '#1dd1a1', 
         '#feca57', '#ff9ff3', '#00d2d3', '#48dbfb', 
-        '#ff9f43', '#c8d6e5', '#576574', '#222f3e'
+        '#ff9f43', '#c8d6e5', '#576574',
     ];
     let spinAngle = 0;
     let currentRotation = 0;
