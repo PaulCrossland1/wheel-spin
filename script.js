@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModalButton = document.getElementById('close-modal');
     const confettiCanvas = document.getElementById('confetti-canvas');
     
+    // Offscreen canvas for pre-rendering
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+    let wheelImageRendered = false; // Flag to track if wheel is pre-rendered
+
     // Set up confetti canvas
     confettiCanvas.width = window.innerWidth;
     confettiCanvas.height = window.innerHeight;
@@ -19,9 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         confettiCanvas.width = window.innerWidth;
         confettiCanvas.height = window.innerHeight;
+        // Potentially re-render wheel if main canvas size changes
+        // For now, assume fixed main canvas size after init
     });
     
-    // Wheel properties
+    // Main Wheel properties
     const canvas = wheel;
     const ctx = canvas.getContext('2d');
     let entries = [];
@@ -38,11 +45,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let wheelBgColor = '#ffffff';
     let textColor = '#ffffff';
     let wheelFrameColor = '#ffffff';
+    let isFirstUserEntry = true; 
     
-    // Add sample entries
-    addEntry('Player 1');
-    addEntry('Player 2');
-    addEntry('Player 3');
+    // Add sample entries initially & pre-render
+    const placeholderNames = ['Player 1', 'Player 2', 'Player 3'];
+    placeholderNames.forEach(name => addEntry(name, false)); // Add without drawing yet
+    preRenderWheel(); // Pre-render the initial state
+    drawWheel(); // Draw the pre-rendered wheel once
     
     // Event listeners
     addEntryButton.addEventListener('click', function() {
@@ -71,6 +80,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function addEntryFromInput() {
         const input = newEntryInput.value.trim();
         if (input) {
+            let requiresPreRender = false; // Flag if pre-render needed
+            if (isFirstUserEntry) {
+                const currentItems = Array.from(entriesList.querySelectorAll('.entry-item'));
+                currentItems.forEach(item => {
+                    const textElement = item.querySelector('.entry-text');
+                    if (textElement && placeholderNames.includes(textElement.textContent)) {
+                        entriesList.removeChild(item);
+                    }
+                });
+                entries = entries.filter(entry => !placeholderNames.includes(entry));
+                isFirstUserEntry = false;
+                requiresPreRender = true; // Need to re-render after clearing
+            }
+
             if (input.includes(',')) {
                 const newEntries = input.split(',')
                     .map(entry => entry.trim())
@@ -78,24 +101,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (newEntries.length > 0) {
                     showNotification(`Adding ${newEntries.length} entries...`, "info");
-                    
-                    let index = 0;
-                    const addNextEntry = () => {
-                        if (index < newEntries.length) {
-                            addEntry(newEntries[index]);
-                            index++;
-                            setTimeout(addNextEntry, 50);
-                        } else {
-                            showNotification(`Added ${newEntries.length} entries!`, "success");
-                        }
-                    };
-                    
-                    addNextEntry();
+                    newEntries.forEach(entryText => addEntry(entryText, false)); // Add without drawing
+                    requiresPreRender = true;
+                    setTimeout(() => {
+                        showNotification(`Added ${newEntries.length} entries!`, "success");
+                    }, 50 * newEntries.length + 100); // Show after entries added
                 }
             } else {
-                addEntry(input);
+                addEntry(input, false); // Add single entry without drawing
+                requiresPreRender = true;
             }
             
+            if (requiresPreRender) {
+                preRenderWheel(); // Re-render the offscreen canvas
+                drawWheel(); // Draw the updated wheel to the main canvas
+            }
+
             newEntryInput.value = '';
             newEntryInput.focus();
         }
@@ -129,107 +150,177 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
     }
             
-    function addEntry(text) {
+    function addEntry(text, shouldDraw = true) {
         if (entries.includes(text)) {
             showNotification(`"${text}" is already in the wheel!`, "error");
             return;
         }
-        
         entries.push(text);
         
+        // --- DOM manipulation for the list --- START
         const entryItem = document.createElement('div');
         entryItem.className = 'entry-item';
-        
         const entryText = document.createElement('div');
         entryText.className = 'entry-text';
         entryText.textContent = text;
-        
+        entryText.contentEditable = true; 
+        entryText.dataset.originalValue = text; 
+
+        entryText.addEventListener('blur', function(event) {
+            const originalValue = event.target.dataset.originalValue;
+            const newValue = event.target.textContent.trim();
+            if (!newValue) {
+                showNotification("Entry name cannot be empty!", "error");
+                event.target.textContent = originalValue; 
+                return;
+            }
+            if (newValue !== originalValue) {
+                const isDuplicate = entries.some((entry, index) => 
+                    entry === newValue && entries.indexOf(originalValue) !== index
+                );
+                if (isDuplicate) {
+                    showNotification(`"${newValue}" is already in the wheel!`, "error");
+                    event.target.textContent = originalValue; 
+                    return;
+                }
+                const index = entries.indexOf(originalValue);
+                if (index > -1) {
+                    entries[index] = newValue;
+                    event.target.dataset.originalValue = newValue; 
+                    preRenderWheel(); // Re-render needed after edit
+                    drawWheel(); 
+                    showNotification(`Entry updated to "${newValue}"`, "success");
+                } else {
+                    showNotification("Error updating entry. Original not found.", "error");
+                    event.target.textContent = originalValue; 
+                }
+            }
+        });
+        entryText.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); 
+                event.target.blur(); 
+            }
+        });
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-entry';
         deleteButton.innerHTML = '&times;';
         deleteButton.addEventListener('click', function() {
-            const index = entries.indexOf(text);
+            const currentValue = entryText.textContent.trim(); 
+            const index = entries.indexOf(currentValue);
             if (index > -1) {
                 entries.splice(index, 1);
                 entriesList.removeChild(entryItem);
+                preRenderWheel(); // Re-render needed after delete
                 drawWheel();
             }
         });
-        
         entryItem.appendChild(entryText);
         entryItem.appendChild(deleteButton);
         entriesList.appendChild(entryItem);
-        
         entriesList.scrollTop = entriesList.scrollHeight;
+        // --- DOM manipulation for the list --- END
         
-        drawWheel();
+        // Only draw immediately if specified (used for initial load)
+        if (shouldDraw) {
+             preRenderWheel(); // Re-render needed when adding individually and drawing
+             drawWheel();
+        }
     }
     
-    function drawWheel() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (entries.length === 0) return;
-        
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
+    // Pre-render the static wheel to the offscreen canvas
+    function preRenderWheel() {
+        // Ensure offscreen canvas matches main canvas size
+        offscreenCanvas.width = canvas.width;
+        offscreenCanvas.height = canvas.height;
+
+        offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+        if (entries.length === 0) {
+            wheelImageRendered = false;
+            return; // Nothing to render
+        }
+
+        const centerX = offscreenCanvas.width / 2;
+        const centerY = offscreenCanvas.height / 2;
         const radius = Math.min(centerX, centerY) * 0.9;
-        
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = wheelBgColor;
-        ctx.fill();
-        
+
+        // Draw segments and text onto offscreen canvas (NO rotation here)
         const arc = (2 * Math.PI) / entries.length;
-        
         for (let i = 0; i < entries.length; i++) {
-            const angle = i * arc + currentRotation;
+            const angle = i * arc; // Start angle based on index, no currentRotation
             
             // Draw segment fill
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, angle, angle + arc);
-            ctx.lineTo(centerX, centerY);
-            ctx.fillStyle = wheelColors[i % wheelColors.length];
-            ctx.fill();
+            offscreenCtx.beginPath();
+            offscreenCtx.moveTo(centerX, centerY);
+            offscreenCtx.arc(centerX, centerY, radius, angle, angle + arc);
+            offscreenCtx.lineTo(centerX, centerY);
+            offscreenCtx.fillStyle = wheelColors[i % wheelColors.length];
+            offscreenCtx.fill();
             
             // Draw text
-            ctx.save();
-            ctx.translate(centerX, centerY);
-            ctx.rotate(angle + arc / 2);
+            offscreenCtx.save();
+            offscreenCtx.translate(centerX, centerY);
+            offscreenCtx.rotate(angle + arc / 2); // Rotate text relative to its segment
             
             const text = entries[i];
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 16px Poppins, Arial';
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'middle';
+            offscreenCtx.fillStyle = textColor; 
+            offscreenCtx.font = 'bold 16px Poppins, Arial'; 
+            offscreenCtx.textAlign = 'right';
+            offscreenCtx.textBaseline = 'middle';
             
-            const textRadius = radius * 0.75;
-            if (text.length > 12) {
-                ctx.font = 'bold 14px Poppins, Arial';
-            }
-            if (text.length > 20) {
-                ctx.font = 'bold 12px Poppins, Arial';
-            }
+            const textRadius = radius * 0.75; 
+            if (text.length > 12) offscreenCtx.font = 'bold 14px Poppins, Arial';
+            if (text.length > 20) offscreenCtx.font = 'bold 12px Poppins, Arial';
             
-            ctx.fillText(text, textRadius, 0);
-            ctx.restore();
+            offscreenCtx.fillText(text, textRadius, 0);
+            offscreenCtx.restore();
         }
-        
-        // Redraw the main wheel frame AFTER drawing all segments
-        // This ensures the frame is on top and covers segment edges
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.lineWidth = 5; 
-        ctx.strokeStyle = wheelFrameColor; 
-        ctx.stroke();
 
-        // Draw center circle (also redraw to ensure it's on top)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 0.1, 0, 2 * Math.PI);
-        ctx.fillStyle = wheelFrameColor; 
-        ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = wheelFrameColor; 
-        ctx.stroke();
+        // Draw the main wheel frame onto offscreen canvas
+        offscreenCtx.beginPath();
+        offscreenCtx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        offscreenCtx.lineWidth = 5; 
+        offscreenCtx.strokeStyle = wheelFrameColor; 
+        offscreenCtx.stroke();
+
+        // Draw center circle onto offscreen canvas
+        offscreenCtx.beginPath();
+        offscreenCtx.arc(centerX, centerY, radius * 0.1, 0, 2 * Math.PI);
+        offscreenCtx.fillStyle = wheelFrameColor; 
+        offscreenCtx.fill();
+        offscreenCtx.lineWidth = 2;
+        offscreenCtx.strokeStyle = wheelFrameColor; 
+        offscreenCtx.stroke();
+
+        wheelImageRendered = true; // Mark as rendered
+    }
+
+    // Simplified main drawing function - draws the rotated pre-rendered image
+    function drawWheel() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!wheelImageRendered || entries.length === 0) {
+            // Optionally draw a placeholder if nothing is rendered/no entries
+            ctx.fillStyle = '#555';
+            ctx.font = '20px Poppins';
+            ctx.textAlign = 'center';
+            ctx.fillText("Add entries to spin!", canvas.width / 2, canvas.height / 2);
+            return; // Don't draw the wheel image
+        }
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(currentRotation);
+        // Draw the pre-rendered canvas, centered
+        ctx.drawImage(offscreenCanvas, -centerX, -centerY); 
+        ctx.restore();
+        
+        // NOTE: The main wheel frame and center circle are now part of the 
+        // pre-rendered image, so no need to draw them separately here.
     }
     
     function startSpin() {
@@ -375,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initial wheel drawing on load
-    drawWheel(); 
+    // Initial wheel drawing is now handled by the initial addEntry calls
+    // drawWheel(); // Remove this final one if it exists at the end
     
 });
