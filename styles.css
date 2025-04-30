@@ -392,8 +392,47 @@ footer a:hover {
 
 /* Media queries */
 @media (max-width: 500px) {
+    .container {
+        padding: 10px;
+    }
+
+    .main-content {
+        flex-direction: column;
+        overflow-y: auto;
+        gap: 10px;
+    }
+
+    .wheel-container {
+        flex: 0 0 auto;
+        max-height: 45vh;
+        min-height: 250px;
+        margin-bottom: 10px;
+        padding: 0.5rem;
+    }
+    
+    #wheel {
+        max-width: 90%;
+        max-height: calc(45vh - 80px);
+    }
+    
+    .entries-panel {
+        flex: 1 1 auto;
+        max-width: 100%;
+        height: auto;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .entries-container {
+        flex: 1 1 auto;
+        min-height: 100px;
+    }
+
     .entry-form {
+        flex: 0 0 auto;
         flex-wrap: nowrap;
+        margin-top: 10px;
     }
     
     #new-entry {
@@ -410,5 +449,9 @@ footer a:hover {
     
     .winner-message {
         font-size: 1.2rem;
+    }
+
+    footer {
+        padding-bottom: 10px;
     }
 }
